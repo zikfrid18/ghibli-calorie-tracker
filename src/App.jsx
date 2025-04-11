@@ -1,71 +1,86 @@
+import { useState } from "react";
 
-import { useState } from 'react';
+function App() {
+  const [food, setFood] = useState("");
+  const [grams, setGrams] = useState("");
+  const [calories, setCalories] = useState(null);
 
-const sampleData = [
-  { name: 'Apple', caloriesPer100g: 52 },
-  { name: 'Banana', caloriesPer100g: 89 },
-  { name: 'Rice', caloriesPer100g: 130 },
-];
-
-export default function App() {
-  const [foodLog, setFoodLog] = useState([]);
-  const [gramsInput, setGramsInput] = useState({});
-  
-  const handleAdd = (item) => {
-    const grams = gramsInput[item.name] || 100;
-    const calories = (item.caloriesPer100g / 100) * grams;
-
-    setFoodLog([...foodLog, { ...item, grams, calories }]);
-    setGramsInput((prev) => ({ ...prev, [item.name]: '' }));
+  // Примерная калорийность на 100 г для демонстрации (можно заменить базой USDA позже)
+  const foodCaloriesPer100g = {
+    яблоко: 52,
+    банан: 96,
+    хлеб: 265,
+    сыр: 402,
+    курица: 239,
+    рис: 130,
+    яйцо: 155,
   };
 
-  const totalCalories = foodLog.reduce((sum, item) => sum + item.calories, 0);
+  const handleCalculate = () => {
+    const foodKey = food.trim().toLowerCase();
+    const kcalPer100g = foodCaloriesPer100g[foodKey];
+
+    if (!kcalPer100g) {
+      alert("Продукт не найден в базе. Попробуй: яблоко, банан, хлеб, сыр...");
+      return;
+    }
+
+    const gramValue = parseFloat(grams);
+    if (isNaN(gramValue)) {
+      alert("Введите корректное количество граммов.");
+      return;
+    }
+
+    const kcal = (kcalPer100g / 100) * gramValue;
+    setCalories(kcal.toFixed(2));
+  };
 
   return (
-    <div className="min-h-screen bg-green-100 p-8 font-sans">
-      <h1 className="text-3xl font-bold mb-4 text-center text-green-800">🍃 Ghibli Calorie Tracker</h1>
+    <div className="min-h-screen bg-[#f2efe4] text-[#3e3e3e] flex flex-col items-center justify-center p-4 font-[Georgia]">
+      <h1 className="text-4xl mb-6 font-bold text-[#5e5c6c]">
+        Ghibli Калькулятор Калорий
+      </h1>
 
-      <div className="space-y-4">
-        {sampleData.map((item) => (
-          <div key={item.name} className="bg-white p-4 rounded-xl shadow flex items-center justify-between">
-            <div>
-              <p className="font-semibold">{item.name}</p>
-              <p className="text-sm text-gray-500">{item.caloriesPer100g} ккал / 100г</p>
-            </div>
+      <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
+        <label className="block mb-3">
+          <span>Продукт:</span>
+          <input
+            type="text"
+            value={food}
+            onChange={(e) => setFood(e.target.value)}
+            placeholder="например, яблоко"
+            className="mt-1 w-full p-2 border border-gray-300 rounded-xl"
+          />
+        </label>
 
-            <input
-              type="number"
-              placeholder="г"
-              className="w-20 p-1 border rounded mr-2"
-              value={gramsInput[item.name] || ''}
-              onChange={(e) => setGramsInput((prev) => ({ ...prev, [item.name]: e.target.value }))}
-            />
+        <label className="block mb-4">
+          <span>Граммы:</span>
+          <input
+            type="number"
+            value={grams}
+            onChange={(e) => setGrams(e.target.value)}
+            placeholder="например, 150"
+            className="mt-1 w-full p-2 border border-gray-300 rounded-xl"
+          />
+        </label>
 
-            <button
-              onClick={() => handleAdd(item)}
-              className="bg-green-400 hover:bg-green-500 text-white px-4 py-1 rounded-lg"
-            >
-              Добавить
-            </button>
+        <button
+          onClick={handleCalculate}
+          className="bg-[#8fbfa8] hover:bg-[#6fa896] text-white font-semibold py-2 px-4 rounded-xl w-full"
+        >
+          Рассчитать
+        </button>
+
+        {calories && (
+          <div className="mt-4 text-xl text-[#4c4c4c]">
+            Калорий: <strong>{calories}</strong> ккал
           </div>
-        ))}
+        )}
       </div>
 
-      <div className="mt-8 p-4 bg-white rounded-xl shadow">
-        <h2 className="text-xl font-bold mb-2">🍽️ Съедено:</h2>
-        {foodLog.length === 0 && <p className="text-gray-500">Пока ничего не добавлено</p>}
-        <ul>
-          {foodLog.map((item, i) => (
-            <li key={i}>
-              {item.name} — {item.grams}г → {item.calories.toFixed(1)} ккал
-            </li>
-          ))}
-        </ul>
-
-        <p className="mt-4 font-bold text-green-700">
-          ✅ Всего: {totalCalories.toFixed(1)} ккал
-        </p>
-      </div>
+      <p className="mt-8 text-sm text-gray-500">✨ Powered by Ghibli vibes ✨</p>
     </div>
   );
 }
+
+export default App;
